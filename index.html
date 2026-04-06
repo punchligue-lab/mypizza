@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MYPIZZA.LU — Trouvez votre pizzeria au Luxembourg</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --beige:#F5EFE6;--cream:#FDFAF6;--parchment:#EDE0CF;
+  --brown:#3A2515;--brown2:#6B4226;--brown3:#9A6B4B;
+  --terra:#C1533A;--terra2:#E8795F;--terra3:#F4C5B8;
+  --gold:#A07835;--gold2:#C9A55A;
+  --border:rgba(58,37,21,.13);--shadow:rgba(58,37,21,.1);
+  --r:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--beige);color:var(--brown);font-family:'Lora',Georgia,serif;min-height:100vh}
+
+/* ─ HEADER ─ */
+header{
+  background:var(--cream);border-bottom:1px solid var(--border);
+  padding:0 32px;display:flex;align-items:center;justify-content:space-between;
+  height:64px;position:sticky;top:0;z-index:200;
+}
+.logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:600;
+  color:var(--terra);text-decoration:none;display:flex;align-items:center;gap:8px;letter-spacing:.02em}
+.logo span{color:var(--brown);font-weight:400}
+
+/* ─ NAV TABS ─ */
+nav{display:flex;gap:4px}
+.nav-btn{
+  background:none;border:none;cursor:pointer;
+  font-family:'Lora',serif;font-size:.95rem;font-weight:400;
+  color:var(--brown3);padding:8px 18px;border-radius:30px;
+  transition:all .18s;display:flex;align-items:center;gap:6px;
+}
+.nav-btn:hover{background:var(--parchment);color:var(--brown)}
+.nav-btn.active{background:var(--terra);color:#fff;font-weight:500}
+.nav-btn svg{width:16px;height:16px;fill:currentColor;flex-shrink:0}
+
+/* ─ VIEWS ─ */
+.view{display:none}
+.view.active{display:block}
+
+/* ─ HERO ─ */
+.hero{
+  text-align:center;padding:72px 20px 56px;
+  background:linear-gradient(180deg,var(--cream) 0%,var(--beige) 100%);
+  border-bottom:1px solid var(--border);
+}
+.hero-pizza{font-size:3rem;margin-bottom:20px;display:block;line-height:1}
+h1{font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3.2rem);
+  font-weight:400;color:var(--brown);line-height:1.15;margin-bottom:10px}
+h1 em{color:var(--terra);font-style:italic}
+.hero-sub{font-size:1.05rem;color:var(--brown3);margin-bottom:44px;font-weight:400}
+
+/* ─ SEARCH BOX ─ */
+.search-wrap{max-width:620px;margin:0 auto;position:relative}
+.search-mode{
+  display:flex;background:var(--parchment);border-radius:30px;
+  padding:4px;margin-bottom:14px;gap:4px;width:fit-content;margin:0 auto 14px;
+}
+.mode-btn{
+  background:none;border:none;cursor:pointer;
+  font-family:'Lora',serif;font-size:.9rem;
+  color:var(--brown3);padding:7px 20px;border-radius:26px;transition:all .15s;
+}
+.mode-btn.active{background:var(--cream);color:var(--brown);font-weight:500;
+  box-shadow:0 1px 4px var(--shadow)}
+.search-field{
+  display:flex;align-items:center;
+  background:var(--cream);border:2px solid var(--border);border-radius:50px;
+  padding:0 20px 0 22px;
+  box-shadow:0 4px 20px var(--shadow);
+  transition:border-color .2s,box-shadow .2s;
+}
+.search-field:focus-within{border-color:var(--terra);box-shadow:0 6px 30px rgba(193,83,58,.15)}
+.search-field svg{width:18px;height:18px;fill:var(--brown3);flex-shrink:0;opacity:.6}
+#searchInput{
+  flex:1;border:none;outline:none;background:transparent;
+  font-family:'Lora',serif;font-size:1.15rem;color:var(--brown);
+  padding:17px 14px;
+}
+#searchInput::placeholder{color:rgba(58,37,21,.32);font-style:italic}
+.clear-btn{background:none;border:none;cursor:pointer;color:var(--brown3);
+  font-size:1.1rem;padding:6px;opacity:.5;display:none}
+.clear-btn:hover{opacity:1}
+
+/* ─ AUTOCOMPLETE ─ */
+.ac-drop{
+  position:absolute;top:calc(100% + 6px);left:0;right:0;
+  background:var(--cream);border:1.5px solid var(--border);border-radius:18px;
+  box-shadow:0 12px 40px rgba(58,37,21,.14);
+  display:none;z-index:100;overflow:hidden;
+}
+.ac-drop.open{display:block}
+.ac-item{
+  padding:12px 20px;cursor:pointer;border-bottom:1px solid rgba(58,37,21,.06);
+  display:flex;align-items:center;gap:12px;transition:background .1s;
+  font-size:1rem;
+}
+.ac-item:last-child{border-bottom:none}
+.ac-item:hover,.ac-item.ac-active{background:var(--parchment)}
+.ac-name mark{background:none;color:var(--terra);font-weight:600}
+.ac-city{font-size:.85rem;color:var(--brown3);font-style:italic;margin-left:auto}
+.ac-more{padding:9px 20px;text-align:center;font-size:.85rem;
+  color:var(--brown3);font-style:italic;background:rgba(58,37,21,.03)}
+
+/* ─ SEARCH RESULTS ─ */
+#searchResults{max-width:1100px;margin:0 auto;padding:36px 24px 80px}
+.res-header{display:flex;align-items:baseline;justify-content:space-between;
+  margin-bottom:22px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.res-count{font-size:1rem;color:var(--brown3);font-style:italic}
+.res-count strong{color:var(--terra);font-size:1.2rem;font-style:normal}
+.empty{text-align:center;padding:60px 0;color:var(--brown3)}
+.empty big{font-size:2.5rem;display:block;margin-bottom:12px}
+.empty p{font-style:italic}
+
+/* ─ CARDS ─ */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+.card{
+  background:var(--cream);border:1.5px solid var(--border);border-radius:var(--r);
+  padding:20px 22px;transition:transform .2s,box-shadow .2s,border-color .2s;
+}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--shadow);
+  border-color:rgba(193,83,58,.25)}
+.card-name{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:600;
+  color:var(--brown);margin-bottom:3px;line-height:1.25}
+.card-city{font-size:.9rem;color:var(--brown3);font-style:italic;margin-bottom:14px}
+.card-city::before{content:"📍 ";font-style:normal;font-size:.8rem}
+.card-hr{height:1px;background:var(--border);margin-bottom:12px}
+.card-row{display:flex;align-items:center;gap:10px;font-size:.95rem;margin-bottom:7px}
+.card-row:last-child{margin-bottom:0}
+.card-icon{width:20px;text-align:center;flex-shrink:0;font-size:.85rem;opacity:.7}
+.card-row a{color:var(--brown);text-decoration:none;transition:color .15s}
+.card-row a:hover{color:var(--terra)}
+.card-na{color:rgba(58,37,21,.25);font-style:italic}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.card{animation:fadeUp .25s ease both}
+
+/* ─────────────────────────────── */
+/* ─ MAP VIEW ─ */
+/* ─────────────────────────────── */
+.map-view{display:none;max-width:1200px;margin:0 auto;padding:40px 24px 80px}
+.map-view.active{display:flex;gap:40px;flex-wrap:wrap}
+.map-side{flex:0 0 360px}
+.map-title{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:400;
+  color:var(--brown);margin-bottom:6px}
+.map-subtitle{font-size:.9rem;color:var(--brown3);font-style:italic;margin-bottom:24px}
+
+/* SVG map */
+.lux-map{width:100%;max-width:360px}
+.canton-path{
+  fill:var(--parchment);stroke:var(--cream);stroke-width:1.5;
+  cursor:pointer;transition:fill .2s;
+}
+.canton-path:hover{fill:var(--terra3)}
+.canton-path.selected{fill:var(--terra);stroke:var(--terra2)}
+.canton-label{
+  font-family:'Lora',serif;font-size:7px;fill:var(--brown);
+  pointer-events:none;text-anchor:middle;dominant-baseline:middle;
+}
+.canton-label.selected{fill:#fff}
+
+/* Map results */
+.map-results{flex:1;min-width:280px}
+.map-region-title{
+  font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:400;
+  color:var(--brown);margin-bottom:4px;
+}
+.map-region-count{font-size:.9rem;color:var(--brown3);font-style:italic;margin-bottom:22px}
+.map-hint{
+  text-align:center;padding:60px 20px;
+  color:var(--brown3);font-style:italic;
+}
+.map-hint big{font-size:3rem;display:block;margin-bottom:14px}
+
+/* ─────────────────────────────── */
+/* ─ CITY VIEW ─ */
+/* ─────────────────────────────── */
+.city-view{display:none;max-width:1100px;margin:0 auto;padding:40px 24px 80px}
+.city-view.active{display:block}
+.city-view h2{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:400;
+  color:var(--brown);margin-bottom:6px}
+.city-view .sub{font-size:.9rem;color:var(--brown3);font-style:italic;margin-bottom:28px}
+.city-filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:32px}
+.city-btn{
+  background:var(--cream);border:1.5px solid var(--border);border-radius:30px;
+  padding:7px 16px;font-family:'Lora',serif;font-size:.9rem;
+  color:var(--brown2);cursor:pointer;transition:all .15s;
+  display:flex;align-items:center;gap:6px;
+}
+.city-btn:hover{border-color:var(--terra);color:var(--terra)}
+.city-btn.active{background:var(--terra);border-color:var(--terra);color:#fff}
+.city-count{font-size:.75rem;opacity:.7}
+.city-result-header{
+  font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:400;
+  color:var(--brown);margin-bottom:16px;display:flex;align-items:center;gap:10px;
+}
+.city-result-header::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ─ FOOTER ─ */
+footer{background:var(--parchment);border-top:1px solid var(--border);
+  padding:24px 32px;text-align:center;font-size:.85rem;color:var(--brown3);font-style:italic}
+
+/* RESPONSIVE */
+@media(max-width:700px){
+  header{padding:0 16px}
+  nav .nav-btn{padding:7px 12px;font-size:.85rem}
+  .map-view.active{flex-direction:column}
+  .map-side{flex:none;width:100%}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a class="logo" href="#" onclick="showView('search');return false">
+    🍕 MYPIZZA<span>.LU</span>
+  </a>
+  <nav>
+    <button class="nav-btn active" id="navSearch" onclick="showView('search')">
+      <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      Rechercher
+    </button>
+    <button class="nav-btn" id="navMap" onclick="showView('map')">
+      <svg viewBox="0 0 24 24"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
+      Carte des régions
+    </button>
+    <button class="nav-btn" id="navCity" onclick="showView('city')">
+      <svg viewBox="0 0 24 24"><path d="M15 11V5l-3-3-3 3v2H3v14h18V11h-6zm-8 8H5v-2h2v2zm0-4H5v-2h2v2zm0-4H5V9h2v2zm6 8h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2V9h2v2zm0-4h-2V5h2v2zm6 12h-2v-2h2v2zm0-4h-2v-2h2v2z"/></svg>
+      Par ville
+    </button>
+  </nav>
+</header>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- VIEW 1 — RECHERCHER -->
+<!-- ═══════════════════════════════════════ -->
+<div class="view active" id="viewSearch">
+  <div class="hero">
+    <span class="hero-pizza">🍕</span>
+    <h1>Trouve une <em>pizzeria</em><br>au Luxembourg</h1>
+    <p class="hero-sub">195 établissements répertoriés dans tout le Grand-Duché</p>
+
+    <div class="search-wrap">
+      <div class="search-mode">
+        <button class="mode-btn active" id="modeNom" onclick="setMode('nom')">Par nom</button>
+        <button class="mode-btn" id="modeVille" onclick="setMode('ville')">Par ville</button>
+      </div>
+      <div class="search-field">
+        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <input type="text" id="searchInput" placeholder="Tapez pour rechercher…" autocomplete="off" spellcheck="false">
+        <button class="clear-btn" id="clearBtn">✕</button>
+      </div>
+      <div class="ac-drop" id="acDrop"></div>
+    </div>
+  </div>
+
+  <div id="searchResults"></div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- VIEW 2 — CARTE -->
+<!-- ═══════════════════════════════════════ -->
+<div class="view" id="viewMap">
+  <div class="map-view" id="mapContainer">
+    <div class="map-side">
+      <h2 class="map-title">Carte des régions</h2>
+      <p class="map-subtitle">Cliquez sur un canton pour voir ses pizzerias</p>
+      <svg class="lux-map" viewBox="0 0 300 380" xmlns="http://www.w3.org/2000/svg" id="luxMap">
+
+        <!-- CLERVAUX -->
+        <path class="canton-path" id="cp-CLERVAUX"
+          d="M 40,10 L 195,10 L 195,48 L 210,48 L 210,95 L 200,125 L 170,132 L 85,128 L 35,118 Z"
+          onclick="selectCanton('CLERVAUX')"/>
+        <text class="canton-label" id="cl-CLERVAUX" x="115" y="72">Clervaux</text>
+
+        <!-- VIANDEN -->
+        <path class="canton-path" id="cp-VIANDEN"
+          d="M 195,10 L 260,14 L 268,75 L 238,82 L 210,95 L 210,48 L 195,48 Z"
+          onclick="selectCanton('VIANDEN')"/>
+        <text class="canton-label" id="cl-VIANDEN" x="230" y="52">Vianden</text>
+
+        <!-- WILTZ -->
+        <path class="canton-path" id="cp-WILTZ"
+          d="M 12,118 L 35,118 L 40,140 L 48,162 L 44,232 L 14,226 L 8,192 L 18,128 Z"
+          onclick="selectCanton('WILTZ')"/>
+        <text class="canton-label" id="cl-WILTZ" x="26" y="178">Wiltz</text>
+
+        <!-- DIEKIRCH -->
+        <path class="canton-path" id="cp-DIEKIRCH"
+          d="M 35,118 L 85,128 L 170,132 L 200,125 L 210,95 L 238,82 L 268,75 L 282,148 L 275,178 L 218,188 L 165,183 L 95,178 L 52,165 L 40,142 Z"
+          onclick="selectCanton('DIEKIRCH')"/>
+        <text class="canton-label" id="cl-DIEKIRCH" x="155" y="152">Diekirch</text>
+
+        <!-- REDANGE -->
+        <path class="canton-path" id="cp-REDANGE"
+          d="M 8,192 L 14,226 L 44,232 L 50,295 L 28,308 L 8,298 Z"
+          onclick="selectCanton('REDANGE')"/>
+        <text class="canton-label" id="cl-REDANGE" x="26" y="263">Redange</text>
+
+        <!-- MERSCH -->
+        <path class="canton-path" id="cp-MERSCH"
+          d="M 52,165 L 95,178 L 165,183 L 185,242 L 175,266 L 140,272 L 94,266 L 72,248 L 62,236 L 55,198 Z"
+          onclick="selectCanton('MERSCH')"/>
+        <text class="canton-label" id="cl-MERSCH" x="120" y="225">Mersch</text>
+
+        <!-- ECHTERNACH -->
+        <path class="canton-path" id="cp-ECHTERNACH"
+          d="M 275,178 L 282,148 L 290,188 L 295,262 L 270,272 L 248,254 L 218,188 Z"
+          onclick="selectCanton('ECHTERNACH')"/>
+        <text class="canton-label" id="cl-ECHTERNACH" x="258" y="222">Echternach</text>
+
+        <!-- CAPELLEN -->
+        <path class="canton-path" id="cp-CAPELLEN"
+          d="M 8,298 L 28,308 L 50,295 L 86,298 L 103,322 L 88,355 L 8,352 Z"
+          onclick="selectCanton('CAPELLEN')"/>
+        <text class="canton-label" id="cl-CAPELLEN" x="52" y="330">Capellen</text>
+
+        <!-- LUXEMBOURG -->
+        <path class="canton-path" id="cp-LUXEMBOURG"
+          d="M 72,248 L 140,272 L 175,266 L 185,242 L 165,183 L 218,188 L 248,254 L 270,272 L 262,340 L 190,352 L 170,362 L 122,357 L 103,322 L 86,298 L 55,298 L 60,236 Z"
+          onclick="selectCanton('LUXEMBOURG')"/>
+        <text class="canton-label" id="cl-LUXEMBOURG" x="170" y="310">Luxembourg</text>
+
+        <!-- GREVENMACHER -->
+        <path class="canton-path" id="cp-GREVENMACHER"
+          d="M 248,254 L 270,272 L 295,262 L 298,342 L 320,372 L 278,382 L 262,340 Z"
+          onclick="selectCanton('GREVENMACHER')"/>
+        <text class="canton-label" id="cl-GREVENMACHER" x="284" y="320">Grevenmacher</text>
+
+        <!-- ESCH-SUR-ALZETTE -->
+        <path class="canton-path" id="cp-ESCH"
+          d="M 8,352 L 88,355 L 103,322 L 122,357 L 170,362 L 168,400 L 8,400 Z"
+          onclick="selectCanton('ESCH')"/>
+        <text class="canton-label" id="cl-ESCH" x="88" y="380">Esch-sur-Alzette</text>
+
+        <!-- REMICH -->
+        <path class="canton-path" id="cp-REMICH"
+          d="M 170,362 L 262,340 L 278,382 L 320,372 L 315,400 L 170,400 Z"
+          onclick="selectCanton('REMICH')"/>
+        <text class="canton-label" id="cl-REMICH" x="240" y="383">Remich</text>
+
+      </svg>
+    </div>
+
+    <div class="map-results" id="mapResults">
+      <div class="map-hint">
+        <big>🗺️</big>
+        <p>Cliquez sur un canton<br>pour découvrir ses pizzerias</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- VIEW 3 — PAR VILLE -->
+<!-- ═══════════════════════════════════════ -->
+<div class="view" id="viewCity">
+  <div class="city-view" id="cityContainer">
+    <h2>Toutes les villes & régions</h2>
+    <p class="sub">Sélectionnez une région pour voir ses pizzerias</p>
+    <div class="city-filters" id="cityFilters"></div>
+    <div id="cityResults"></div>
+  </div>
+</div>
+
+<footer>
+  🍕 MYPIZZA.LU — Le répertoire complet des pizzerias du Grand-Duché de Luxembourg &nbsp;·&nbsp; 195 établissements · 35 régions · 2026
+</footer>
+
+<script>
+// ══════════════════════════════════════════════
+// DATA — 195 pizzerias
+// ══════════════════════════════════════════════
+const P = [
+{n:"Azzurra Mia Pizzeria",c:"Luxembourg-Ville",r:"Luxembourg-Ville",canton:"LUXEMBOURG",p:"+352 26 67 50",w:null},
+{n:"Bella Ciao City",c:"Luxembourg-Ville",r:"Luxembourg-Ville",canton:"LUXEMBOURG",p:"+352 26 20 16 70",w:null},
+{n:"Girotondo Luxembourg",c:"Luxembourg-Ville",r:"Luxembourg-Ville",canton:"LUXEMBOURG",p:"+352 28 86 22",w:null},
+{n:"Restaurant Bella Napoli",c:"Luxembourg-Ville",r:"Luxembourg-Ville",canton:"LUXEMBOURG",p:"+352 49 33 67",w:"http://www.bellanapoli.lu"},
+{n:"Partigiano",c:"Luxembourg-Ville",r:"Luxembourg-Ville",canton:"LUXEMBOURG",p:"+352 26 19 00 33",w:null},
+{n:"Onesto",c:"Luxembourg-Ville",r:"Luxembourg-Ville",canton:"LUXEMBOURG",p:"+352 22 38 18",w:null},
+{n:"Al 21 Restaurant",c:"Luxembourg-Ville",r:"Luxembourg-Ville",canton:"LUXEMBOURG",p:"+352 28 37 12 77",w:null},
+{n:"Restaurant-Pizzeria Bacchus SA",c:"Luxembourg-Ville",r:"Luxembourg-Ville",canton:"LUXEMBOURG",p:"+352 47 13 97",w:null},
+{n:"MANI D'ORO – Pasta Fresca e Pizza",c:"Gasperich",r:"Luxembourg-Ville",canton:"LUXEMBOURG",p:"+352 26 18 76 66",w:null},
+{n:"Cloud Factory Neudorf",c:"Luxembourg-Ville",r:"Luxembourg-Ville",canton:"LUXEMBOURG",p:null,w:null},
+{n:"Salento",c:"Luxembourg-Ville",r:"Luxembourg-Ville",canton:"LUXEMBOURG",p:"+352 26 77 15 00",w:null},
+{n:"Ristorante Pizzeria Il Cilento",c:"Hollerich",r:"Luxembourg-Ville",canton:"LUXEMBOURG",p:"+352 28 99 65 33",w:null},
+{n:"La Torre",c:"Luxembourg-Ville",r:"Luxembourg-Ville",canton:"LUXEMBOURG",p:null,w:null},
+{n:"Atelier Del Gusto",c:"Bonnevoie",r:"Luxembourg-Ville",canton:"LUXEMBOURG",p:null,w:null},
+{n:"Hyde Neapolitan Street Pizza",c:"Luxembourg (food truck)",r:"Luxembourg-Ville",canton:"LUXEMBOURG",p:null,w:null},
+{n:"Aylla's Kitchen Restaurant & Pizzeria",c:"Luxembourg-Ville",r:"Luxembourg-Ville",canton:"LUXEMBOURG",p:null,w:null},
+{n:"Pizzeria Da Vinci",c:"Luxembourg-Ville",r:"Luxembourg-Ville",canton:"LUXEMBOURG",p:null,w:null},
+{n:"La Porta Vecchia",c:"Esch-sur-Alzette",r:"Esch-sur-Alzette",canton:"ESCH",p:"+352 621 509 586",w:null},
+{n:"Domanni",c:"Esch-sur-Alzette",r:"Esch-sur-Alzette",canton:"ESCH",p:"+352 26 54 12 39",w:null},
+{n:"Cloud Factory Esch",c:"Esch-sur-Alzette",r:"Esch-sur-Alzette",canton:"ESCH",p:null,w:null},
+{n:"La Storia",c:"Esch-sur-Alzette",r:"Esch-sur-Alzette",canton:"ESCH",p:"+352 26 54 03 20",w:null},
+{n:"Brasserie Terres Rouges",c:"Esch-sur-Alzette",r:"Esch-sur-Alzette",canton:"ESCH",p:"+352 661 337 054",w:null},
+{n:"Restaurant-Pizzeria Carpini",c:"Esch-sur-Alzette",r:"Esch-sur-Alzette",canton:"ESCH",p:"+352 54 13 53",w:null},
+{n:"Restaurant Terres Rouges",c:"Esch-sur-Alzette",r:"Esch-sur-Alzette",canton:"ESCH",p:"+352 27 99 59 95",w:null},
+{n:"Pizzeria Il Sorriso",c:"Esch-sur-Alzette",r:"Esch-sur-Alzette",canton:"ESCH",p:"+352 621 702 469",w:null},
+{n:"Basta Cosi",c:"Esch-sur-Alzette",r:"Esch-sur-Alzette",canton:"ESCH",p:null,w:null},
+{n:"Nonna Nenetta 2.0",c:"Esch-Belval",r:"Belval / Sanem / Soleuvre",canton:"ESCH",p:"+352 27 67 20 44",w:null},
+{n:"IMPASTO Luxembourg",c:"Soleuvre",r:"Belval / Sanem / Soleuvre",canton:"ESCH",p:"+352 621 681 216",w:null},
+{n:"Stella Rosa",c:"Soleuvre",r:"Belval / Sanem / Soleuvre",canton:"ESCH",p:null,w:null},
+{n:"Simplement Bon",c:"Belvaux",r:"Belval / Sanem / Soleuvre",canton:"ESCH",p:"+352 27 93 14 82",w:null},
+{n:"Dal Nigro",c:"Sanem",r:"Belval / Sanem / Soleuvre",canton:"ESCH",p:"+352 26 59 48 18",w:null},
+{n:"Chez Toni – Ristorante Pizzeria dal 1972",c:"Schifflange",r:"Schifflange / Leudelange",canton:"LUXEMBOURG",p:"+352 54 44 22",w:null},
+{n:"Gusto Naturale Schifflange",c:"Schifflange",r:"Schifflange / Leudelange",canton:"LUXEMBOURG",p:"+352 26 54 03 16",w:null},
+{n:"Pizza & Burger Schmoett",c:"Schifflange",r:"Schifflange / Leudelange",canton:"LUXEMBOURG",p:"+352 27 76 74 79",w:null},
+{n:"Restaurant-Pizzeria Petruzzelli",c:"Schifflange",r:"Schifflange / Leudelange",canton:"LUXEMBOURG",p:"+352 26 53 22 80",w:null},
+{n:"Da Vinci",c:"Leudelange",r:"Schifflange / Leudelange",canton:"LUXEMBOURG",p:"+352 26 37 08 42",w:null},
+{n:"La Tradizione",c:"Leudelange",r:"Schifflange / Leudelange",canton:"LUXEMBOURG",p:"+352 26 77 61 88",w:null},
+{n:"Restaurant-Brasserie Mess Café",c:"Reckange-sur-Mess",r:"Reckange / Mondercange",canton:"ESCH",p:"+352 26 37 49 44",w:null},
+{n:"La Mia Terra",c:"Foetz",r:"Foetz / Mondercange",canton:"ESCH",p:"+352 57 34 42",w:null},
+{n:"Pizza Hut Foetz",c:"Foetz",r:"Foetz / Mondercange",canton:"ESCH",p:"+352 28 26 12 82",w:"https://www.pizzahut.lu"},
+{n:"La Rusticana",c:"Howald",r:"Howald / Hesperange / Alzingen",canton:"LUXEMBOURG",p:"+352 49 12 25",w:null},
+{n:"Restaurant-Pizzeria-Auberge La Véranda",c:"Howald",r:"Howald / Hesperange / Alzingen",canton:"LUXEMBOURG",p:"+352 40 04 03",w:null},
+{n:"Il Momento",c:"Hesperange",r:"Howald / Hesperange / Alzingen",canton:"LUXEMBOURG",p:"+352 27 12 60 15",w:null},
+{n:"Brasserie Pizzeria Bei der Uelzecht",c:"Hesperange",r:"Howald / Hesperange / Alzingen",canton:"LUXEMBOURG",p:"+352 36 96 20",w:null},
+{n:"Restaurant Al Sole",c:"Alzingen",r:"Howald / Hesperange / Alzingen",canton:"LUXEMBOURG",p:"+352 36 68 61",w:null},
+{n:"Verace Alzingen",c:"Alzingen",r:"Howald / Hesperange / Alzingen",canton:"LUXEMBOURG",p:"+352 691 107 671",w:null},
+{n:"La vecchia stazione",c:"Itzig",r:"Howald / Hesperange / Alzingen",canton:"LUXEMBOURG",p:"+352 27 99 99 27",w:null},
+{n:"Il Limoncello",c:"Bettembourg",r:"Bettembourg / Roeser",canton:"LUXEMBOURG",p:"+352 26 52 22 40",w:null},
+{n:"La Celula",c:"Bettembourg",r:"Bettembourg / Roeser",canton:"LUXEMBOURG",p:"+352 26 51 00 38",w:null},
+{n:"istanbuLux Kebab & Pizzeria",c:"Bettembourg",r:"Bettembourg / Roeser",canton:"LUXEMBOURG",p:"+352 26 51 20 94",w:null},
+{n:"L'Altro",c:"Crauthem",r:"Bettembourg / Roeser",canton:"LUXEMBOURG",p:"+352 27 12 62 23",w:null},
+{n:"L'Angolino",c:"Livange",r:"Bettembourg / Roeser",canton:"LUXEMBOURG",p:"+352 621 204 264",w:null},
+{n:"La Commedia Dell'arte",c:"Strassen",r:"Bertrange / Strassen / Mamer",canton:"CAPELLEN",p:"+352 31 31 01",w:null},
+{n:"Il Mercato",c:"Strassen",r:"Bertrange / Strassen / Mamer",canton:"CAPELLEN",p:"+352 23 64 11 51",w:null},
+{n:"Villa Sapori",c:"Bartringen",r:"Bertrange / Strassen / Mamer",canton:"CAPELLEN",p:"+352 26 31 34 55",w:null},
+{n:"Restaurant Bar New Inn",c:"Bertrange",r:"Bertrange / Strassen / Mamer",canton:"CAPELLEN",p:"+352 26 39 40 76",w:null},
+{n:"Pizza et Pasta San Marco",c:"Bertrange",r:"Bertrange / Strassen / Mamer",canton:"CAPELLEN",p:"+352 28 28 21 36",w:null},
+{n:"La Croccante",c:"Mamer",r:"Bertrange / Strassen / Mamer",canton:"CAPELLEN",p:"+352 26 11 93 20",w:null},
+{n:"La Pulcinella",c:"Mamer",r:"Bertrange / Strassen / Mamer",canton:"CAPELLEN",p:"+352 31 33 44",w:null},
+{n:"Café Restaurant Pizzeria du Commerce",c:"Capellen",r:"Capellen / Kehlen / Windhof",canton:"CAPELLEN",p:"+352 26 30 06 71",w:null},
+{n:"Il Tartufo",c:"Capellen",r:"Capellen / Kehlen / Windhof",canton:"CAPELLEN",p:"+352 26 10 23 60",w:null},
+{n:"Pulcinella 2",c:"Capellen",r:"Capellen / Kehlen / Windhof",canton:"CAPELLEN",p:"+352 27 70 46 46",w:null},
+{n:"INSIEME",c:"Kehlen",r:"Capellen / Kehlen / Windhof",canton:"CAPELLEN",p:"+352 27 39 70 87",w:null},
+{n:"Gioia in Tavola",c:"Windhof",r:"Capellen / Kehlen / Windhof",canton:"CAPELLEN",p:"+352 27 39 54 45",w:null},
+{n:"Samariano Ristorante & Pizzeria",c:"Nidderkäerjeng",r:"Bascharage / Käerjeng",canton:"CAPELLEN",p:"+352 26 65 00 32",w:null},
+{n:"L'angolo D'Oro",c:"Hautcharage",r:"Bascharage / Käerjeng",canton:"CAPELLEN",p:"+352 50 55 77",w:null},
+{n:"Hotel Carpini",c:"Bascharage",r:"Bascharage / Käerjeng",canton:"CAPELLEN",p:"+352 50 59 99",w:null},
+{n:"Restaurant Pizzeria Legend'K Méditerraneo",c:"Hautcharage",r:"Bascharage / Käerjeng",canton:"CAPELLEN",p:"+352 26 77 28 03",w:null},
+{n:"Hôtel-Restaurant Gulliver",c:"Bascharage",r:"Bascharage / Käerjeng",canton:"CAPELLEN",p:"+352 50 44 55",w:null},
+{n:"La Terrazza Eischen",c:"Eischen",r:"Eischen / Hollenfels",canton:"CAPELLEN",p:"+352 27 52 10 00",w:null},
+{n:"Restaurant-Pizzeria Il Trio",c:"Hollenfels",r:"Eischen / Hollenfels",canton:"CAPELLEN",p:"+352 30 70 39",w:null},
+{n:"Da Leoni",c:"Niederkorn",r:"Differdange",canton:"ESCH",p:"+352 26 58 20 38",w:null},
+{n:"Casa Pomodoro",c:"Differdange",r:"Differdange",canton:"ESCH",p:"+352 26 58 20 88",w:null},
+{n:"Restaurant-Pizzeria San Marino",c:"Differdange",r:"Differdange",canton:"ESCH",p:"+352 58 70 11",w:null},
+{n:"Da Totò",c:"Differdange",r:"Differdange",canton:"ESCH",p:"+352 50 94 50",w:null},
+{n:"Gioiosa",c:"Differdange",r:"Differdange",canton:"ESCH",p:"+352 621 659 863",w:null},
+{n:"AL VOLO",c:"Differdange",r:"Differdange",canton:"ESCH",p:"+352 20 22 05 09",w:null},
+{n:"Mr.John Taverne",c:"Niederkorn",r:"Differdange",canton:"ESCH",p:"+352 691 323 299",w:null},
+{n:"IL TRULLO",c:"Niederkorn",r:"Differdange",canton:"ESCH",p:"+352 691 163 181",w:null},
+{n:"Restaurant-Titelberg",c:"Niederkorn",r:"Differdange",canton:"ESCH",p:"+352 26 58 18 78",w:null},
+{n:"mio & mio",c:"Oberkorn",r:"Differdange",canton:"ESCH",p:"+352 28 79 69 78",w:null},
+{n:"Restaurant Le Verzino",c:"Pétange",r:"Pétange / Rodange",canton:"CAPELLEN",p:"+352 26 50 03 93",w:null},
+{n:"Flora II",c:"Pétange",r:"Pétange / Rodange",canton:"CAPELLEN",p:null,w:null},
+{n:"IL PICCOLINO",c:"Pétange",r:"Pétange / Rodange",canton:"CAPELLEN",p:"+352 26 50 01 31",w:null},
+{n:"Restaurant-Pizzeria L'Orchidea",c:"Rodange",r:"Pétange / Rodange",canton:"CAPELLEN",p:"+352 26 65 20 99",w:null},
+{n:"Il Sole",c:"Lamadelaine",r:"Pétange / Rodange",canton:"CAPELLEN",p:"+352 50 59 14",w:null},
+{n:"Restaurant Il Vagabondo",c:"Hobscheid",r:"Garnich / Hobscheid",canton:"CAPELLEN",p:"+352 27 39 55 90",w:null},
+{n:"Restaurant Lo-sfizio",c:"Bereldange",r:"Walferdange / Bereldange / Steinsel",canton:"LUXEMBOURG",p:"+352 33 99 83",w:null},
+{n:"Restaurant La Riviera",c:"Bereldange",r:"Walferdange / Bereldange / Steinsel",canton:"LUXEMBOURG",p:"+352 33 74 14",w:null},
+{n:"La Ciociara",c:"Walferdange",r:"Walferdange / Bereldange / Steinsel",canton:"LUXEMBOURG",p:"+352 33 10 57",w:null},
+{n:"Café Bereler Stuff",c:"Bereldange",r:"Walferdange / Bereldange / Steinsel",canton:"LUXEMBOURG",p:"+352 26 33 22 22",w:null},
+{n:"Restaurant Dolce Vita",c:"Lorentzweiler",r:"Walferdange / Bereldange / Steinsel",canton:"LUXEMBOURG",p:"+352 27 03 35 92",w:null},
+{n:"Restaurant Pizzeria Dolce Italia",c:"Bofferdange",r:"Walferdange / Bereldange / Steinsel",canton:"LUXEMBOURG",p:"+352 26 37 89 02",w:null},
+{n:"La Fontana",c:"Steinsel",r:"Walferdange / Bereldange / Steinsel",canton:"LUXEMBOURG",p:"+352 26 33 17 94",w:null},
+{n:"Porta Vecchia",c:"Senningerberg",r:"Senningerberg / Niederanven",canton:"LUXEMBOURG",p:"+352 34 91 98",w:null},
+{n:"Charly's Gare",c:"Senningerberg",r:"Senningerberg / Niederanven",canton:"LUXEMBOURG",p:"+352 34 14 68",w:null},
+{n:"Hotel il Castello Borghese",c:"Senningerberg",r:"Senningerberg / Niederanven",canton:"LUXEMBOURG",p:"+352 34 90 01",w:null},
+{n:"Restaurant Il Pizzico",c:"Senningen",r:"Senningerberg / Niederanven",canton:"LUXEMBOURG",p:"+352 26 34 06 47",w:null},
+{n:"Gusto Ristorante Pizzeria",c:"Sandweiler",r:"Senningerberg / Niederanven",canton:"LUXEMBOURG",p:"+352 27 69 47 77",w:null},
+{n:"Restaurant Osteria Di Niederanven",c:"Niederanven",r:"Senningerberg / Niederanven",canton:"LUXEMBOURG",p:"+352 34 00 61",w:null},
+{n:"Restaurant-Pizzeria Bivio",c:"Munsbach",r:"Senningerberg / Niederanven",canton:"LUXEMBOURG",p:"+352 35 01 43",w:null},
+{n:"Pizzeria-Restaurant La Romantica",c:"Moutfort",r:"Senningerberg / Niederanven",canton:"LUXEMBOURG",p:"+352 35 74 25 1",w:null},
+{n:"Restaurant-Pizzeria Gigi l'Amoroso",c:"Dudelange",r:"Dudelange",canton:"ESCH",p:"+352 52 39 20",w:null},
+{n:"Restaurant Antica Bari",c:"Dudelange",r:"Dudelange",canton:"ESCH",p:"+352 26 51 07 32",w:null},
+{n:"Mamma Mia",c:"Dudelange",r:"Dudelange",canton:"ESCH",p:"+352 27 91 93 13",w:null},
+{n:"Restaurant Garibaldi",c:"Dudelange",r:"Dudelange",canton:"ESCH",p:"+352 26 52 10 72",w:null},
+{n:"Restaurant Al Dente",c:"Dudelange",r:"Dudelange",canton:"ESCH",p:"+352 26 51 30 10",w:null},
+{n:"Restaurant-Pizzeria Aal Kayl",c:"Kayl",r:"Kayl / Rumelange",canton:"ESCH",p:"+352 26 56 05 50",w:null},
+{n:"Restaurant-Pizzeria L'Astoria",c:"Kayl",r:"Kayl / Rumelange",canton:"ESCH",p:"+352 56 50 70",w:null},
+{n:"Gregorius",c:"Tétange",r:"Kayl / Rumelange",canton:"ESCH",p:"+352 26 56 19 52",w:null},
+{n:"Bella Ciao Mersch",c:"Mersch",r:"Mersch / Steinfort",canton:"MERSCH",p:"+352 26 18 73 45",w:null},
+{n:"Restaurant-Pizzeria Il Bosco",c:"Schoenfels",r:"Mersch / Steinfort",canton:"MERSCH",p:"+352 26 32 07 29",w:null},
+{n:"Brunetti Ristorante",c:"Mersch",r:"Mersch / Steinfort",canton:"MERSCH",p:"+352 26 77 21 66",w:null},
+{n:"Beim Nuddelskniwweler",c:"Miesdref",r:"Mersch / Steinfort",canton:"MERSCH",p:"+352 26 61 05 33",w:null},
+{n:"Restaurant La Passerelle",c:"Mersch",r:"Mersch / Steinfort",canton:"MERSCH",p:"+352 26 32 15 66",w:null},
+{n:"Pizzeria-restaurant la Campagna",c:"Steinfort",r:"Mersch / Steinfort",canton:"CAPELLEN",p:"+352 39 59 16",w:null},
+{n:"Restaurant Neptwone",c:"Colmar-Berg",r:"Colmar-Berg / Bissen",canton:"MERSCH",p:"+352 26 88 73 40",w:null},
+{n:"Restaurant Pizzeria Am Park",c:"Colmar-Berg",r:"Colmar-Berg / Bissen",canton:"MERSCH",p:"+352 28 99 26 74",w:null},
+{n:"Ristorante Pizzeria La Delizia",c:"Bissen",r:"Colmar-Berg / Bissen",canton:"MERSCH",p:"+352 26 88 50 11",w:null},
+{n:"Café Pizzeria le Millenaire",c:"Niederfeulen",r:"Mertzig / Feulen",canton:"DIEKIRCH",p:"+352 26 81 05 10",w:null},
+{n:"Café Restaurant Chez Nuno",c:"Mäerzeg",r:"Mertzig / Feulen",canton:"DIEKIRCH",p:"+352 26 77 65 08",w:null},
+{n:"Gran-Sasso",c:"Schieren",r:"Schieren / Erpeldange",canton:"DIEKIRCH",p:"+352 81 78 28",w:null},
+{n:"Beim Abruzzebier Restaurant",c:"Grosbous",r:"Grosbous / Wahl",canton:"REDANGE",p:"+352 26 88 11 25",w:null},
+{n:"New Papa & Citu",c:"Grosbous",r:"Grosbous / Wahl",canton:"REDANGE",p:"+352 26 88 12 91",w:null},
+{n:"Michaelo's Pizzeria",c:"Useldange",r:"Redange / Useldange",canton:"REDANGE",p:"+352 26 61 37 15",w:null},
+{n:"Restaurant Um Wier",c:"Useldange",r:"Redange / Useldange",canton:"REDANGE",p:"+352 26 61 02 03",w:null},
+{n:"Restaurant-Pizzeria Piperis",c:"Reichlange",r:"Redange / Useldange",canton:"REDANGE",p:"+352 26 62 57 97",w:null},
+{n:"La Rinascita Pizzeria-Trattoria",c:"Rombach-Martelange",r:"Rambrouch / Boulaide",canton:"REDANGE",p:"+352 26 64 98 38",w:null},
+{n:"Restaurant-Pizzeria Bauschelter Stuff",c:"Boulaide",r:"Rambrouch / Boulaide",canton:"WILTZ",p:"+352 26 91 70 28",w:null},
+{n:"L'Olivo",c:"Fond de Heiderscheid",r:"Rambrouch / Boulaide",canton:"WILTZ",p:"+352 27 70 24 94",w:null},
+{n:"Auberge Fuussekaul",c:"Heischent",r:"Rambrouch / Boulaide",canton:"WILTZ",p:"+352 26 88 88 50",w:null},
+{n:"Restaurant-Pizzeria Op Der Millen",c:"Medernach",r:"Larochette / Vallée de l'Ernz",canton:"MERSCH",p:"+352 26 87 37 40",w:null},
+{n:"Restaurant-Café Bloen Eck",c:"Stegen",r:"Larochette / Vallée de l'Ernz",canton:"MERSCH",p:"+352 28 99 32 69",w:null},
+{n:"Brasserie Pizzeria Beim Franco",c:"Diekirch",r:"Diekirch / Ettelbruck",canton:"DIEKIRCH",p:"+352 26 80 48 58",w:null},
+{n:"Restaurant-Pizzeria Pepperoni",c:"Diekirch",r:"Diekirch / Ettelbruck",canton:"DIEKIRCH",p:"+352 26 80 04 14",w:null},
+{n:"Restaurant Italian",c:"Diekirch",r:"Diekirch / Ettelbruck",canton:"DIEKIRCH",p:"+352 26 80 45 23",w:null},
+{n:"D'Amici",c:"Diekirch",r:"Diekirch / Ettelbruck",canton:"DIEKIRCH",p:"+352 26 80 33 34",w:null},
+{n:"La Fiducia",c:"Ettelbruck",r:"Diekirch / Ettelbruck",canton:"DIEKIRCH",p:"+352 26 87 43 15",w:null},
+{n:"Logis Hôtel-Restaurant Petry",c:"Vianden",r:"Vianden",canton:"VIANDEN",p:"+352 83 41 22",w:null},
+{n:"Montallegro",c:"Hosingen",r:"Hosingen / Parc Hosingen",canton:"CLERVAUX",p:"+352 24 51 99 57",w:null},
+{n:"Tavola",c:"Marnach",r:"Hosingen / Parc Hosingen",canton:"CLERVAUX",p:"+352 27 69 45 80",w:null},
+{n:"Al Trotto",c:"Beaufort",r:"Beaufort / Wallendorf",canton:"ECHTERNACH",p:"+352 27 93 10 02",w:null},
+{n:"Hostellerie de Beaufort",c:"Beaufort",r:"Beaufort / Wallendorf",canton:"ECHTERNACH",p:"+352 26 80 49 55",w:null},
+{n:"Roj Pizza & Kebab",c:"Beaufort",r:"Beaufort / Wallendorf",canton:"ECHTERNACH",p:"+352 26 87 64 21",w:null},
+{n:"Solo Pizza Restaurant",c:"Dillingen",r:"Beaufort / Wallendorf",canton:"ECHTERNACH",p:"+352 26 87 62 14",w:null},
+{n:"Pizzeria Restaurant DOBAO",c:"Wallendorf-Pont",r:"Beaufort / Wallendorf",canton:"ECHTERNACH",p:"+352 28 99 30 08",w:null},
+{n:"Restaurant Pizzeria O Pastor",c:"Consdorf",r:"Mullerthal / Consdorf / Berdorf",canton:"ECHTERNACH",p:"+352 26 78 43 70",w:null},
+{n:"Restaurant Pizzeria Lenert",c:"Berdorf",r:"Mullerthal / Consdorf / Berdorf",canton:"ECHTERNACH",p:"+352 79 08 11",w:null},
+{n:"Una Storia",c:"Echternach",r:"Echternach / Junglinster",canton:"ECHTERNACH",p:"+352 72 99 34",w:null},
+{n:"Pizzeria Du Passage",c:"Echternach",r:"Echternach / Junglinster",canton:"ECHTERNACH",p:"+352 27 67 33 31",w:null},
+{n:"Restaurant Oktav Amadeus",c:"Echternach",r:"Echternach / Junglinster",canton:"ECHTERNACH",p:"+352 26 72 15 18",w:null},
+{n:"Rizelli Restaurant Pizzeria",c:"Echternach",r:"Echternach / Junglinster",canton:"ECHTERNACH",p:"+352 26 72 12 09",w:null},
+{n:"Beim Joe",c:"Echternach",r:"Echternach / Junglinster",canton:"ECHTERNACH",p:"+352 28 99 13 41",w:null},
+{n:"Pizzaguy Luxembourg",c:"Junglinster",r:"Echternach / Junglinster",canton:"ECHTERNACH",p:"+352 26 78 20 73",w:null},
+{n:"Piccobello",c:"Junglinster",r:"Echternach / Junglinster",canton:"ECHTERNACH",p:"+352 78 85 70",w:null},
+{n:"Restaurant Al Treno",c:"Wecker",r:"Biwer / Wecker",canton:"GREVENMACHER",p:"+352 26 71 00 81",w:null},
+{n:"Ristorante-Pizzeria La Taverna",c:"Grevenmacher",r:"Grevenmacher / Moselle",canton:"GREVENMACHER",p:"+352 26 72 96 22",w:null},
+{n:"Pizzeria du Stade Grevenmacher",c:"Grevenmacher",r:"Grevenmacher / Moselle",canton:"GREVENMACHER",p:"+352 26 74 52 01",w:null},
+{n:"Restaurant pizzeria Ehnen",c:"Ehnen",r:"Grevenmacher / Moselle",canton:"GREVENMACHER",p:"+352 27 99 20 27",w:null},
+{n:"Da Vito restaurant",c:"Wormeldange",r:"Grevenmacher / Moselle",canton:"GREVENMACHER",p:"+352 26 74 75 35",w:null},
+{n:"Restaurant Auberge du Lac",c:"Machtum",r:"Grevenmacher / Moselle",canton:"GREVENMACHER",p:"+352 75 02 53",w:null},
+{n:"Trattoria Pizzeria V'diterraneo",c:"Elvange",r:"Schengen / Mondorf",canton:"REMICH",p:"+352 23 60 93 80",w:null},
+{n:"Dolce Vita Ristorante-Pizzeria",c:"Mondorf-les-Bains",r:"Schengen / Mondorf",canton:"REMICH",p:"+352 23 66 80 73",w:null},
+{n:"Dimmi Si",c:"Mondorf-les-Bains",r:"Schengen / Mondorf",canton:"REMICH",p:"+352 26 67 02 62",w:null},
+{n:"Le Paris Pizza",c:"Mondorf-les-Bains",r:"Schengen / Mondorf",canton:"REMICH",p:"+352 23 66 51",w:null},
+{n:"Pizzeria Um Moart",c:"Remich",r:"Remich / Moselle",canton:"REMICH",p:"+352 26 66 45 82",w:null},
+{n:"Pasta Cosy",c:"Remich",r:"Remich / Moselle",canton:"REMICH",p:"+352 26 66 41 01",w:null},
+{n:"Pizzeria Restaurant Flame's",c:"Remich",r:"Remich / Moselle",canton:"REMICH",p:"+352 26 66 01 35",w:null},
+{n:"Quai 14",c:"Remich",r:"Remich / Moselle",canton:"REMICH",p:"+352 23 66 90 91",w:null},
+{n:"Restaurant Da Massimo",c:"Wasserbillig",r:"Wasserbillig / Mertert",canton:"GREVENMACHER",p:"+352 26 74 03 03",w:null},
+{n:"Pizza Hut Wasserbillig",c:"Wasserbillig",r:"Wasserbillig / Mertert",canton:"GREVENMACHER",p:"+352 74 94 95",w:"https://www.pizzahut.lu"},
+{n:"Arancio Nero",c:"Wiltz",r:"Wiltz / Clervaux",canton:"WILTZ",p:"+352 26 95 41 40",w:null},
+{n:"Bella Pizza",c:"Wiltz",r:"Wiltz / Clervaux",canton:"WILTZ",p:"+352 27 74 67 26",w:null},
+{n:"Casa Mia Chez Atia",c:"Wiltz",r:"Wiltz / Clervaux",canton:"WILTZ",p:"+352 26 95 44 94",w:null},
+{n:"Da Nonna Iza",c:"Clervaux",r:"Wiltz / Clervaux",canton:"CLERVAUX",p:"+352 621 656 634",w:null},
+{n:"De Mondo Pizza",c:"Housen",r:"Wiltz / Clervaux",canton:"CLERVAUX",p:"+352 26 90 37 27",w:null},
+{n:"Hôtel-Restaurant Lamy",c:"Troisvierges",r:"Troisvierges / Weiswampach",canton:"CLERVAUX",p:"+352 99 80 41",w:null},
+{n:"Puglia",c:"Troisvierges",r:"Troisvierges / Weiswampach",canton:"CLERVAUX",p:"+352 27 74 63 44",w:null},
+{n:"Casa 56",c:"Weiswampach",r:"Troisvierges / Weiswampach",canton:"CLERVAUX",p:"+352 99 75 99 300",w:null},
+{n:"Primavera Ristorante",c:"Weiswampach",r:"Troisvierges / Weiswampach",canton:"CLERVAUX",p:"+352 26 90 19 20",w:null},
+{n:"Pizza Hut Wemperhardt",c:"Weiswampach",r:"Troisvierges / Weiswampach",canton:"CLERVAUX",p:"+352 26 90 98 15",w:"https://www.pizzahut.lu"},
+];
+
+// Canton display names
+const CANTON_NAMES = {
+  CLERVAUX:"Canton de Clervaux",VIANDEN:"Canton de Vianden",
+  DIEKIRCH:"Canton de Diekirch",WILTZ:"Canton de Wiltz",
+  REDANGE:"Canton de Redange",MERSCH:"Canton de Mersch",
+  ECHTERNACH:"Canton d'Echternach",CAPELLEN:"Canton de Capellen",
+  LUXEMBOURG:"Canton de Luxembourg",GREVENMACHER:"Canton de Grevenmacher",
+  ESCH:"Canton d'Esch-sur-Alzette",REMICH:"Canton de Remich"
+};
+
+// ── VIEW SWITCHING ──
+function showView(v) {
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el=>el.classList.remove('active'));
+  if (v==='search') {
+    document.getElementById('viewSearch').classList.add('active');
+    document.getElementById('navSearch').classList.add('active');
+  } else if (v==='map') {
+    document.getElementById('viewMap').classList.add('active');
+    document.getElementById('navMap').classList.add('active');
+    // show map inside the view
+    document.getElementById('mapContainer').classList.add('active');
+  } else if (v==='city') {
+    document.getElementById('viewCity').classList.add('active');
+    document.getElementById('navCity').classList.add('active');
+    document.getElementById('cityContainer').classList.add('active');
+    if (!cityBuilt) buildCityView();
+  }
+}
+
+// ── CARD BUILDER ──
+function buildCard(p, delay=0) {
+  return `<div class="card" style="animation-delay:${delay}s">
+    <div class="card-name">${p.n}</div>
+    <div class="card-city">${p.c}</div>
+    <div class="card-hr"></div>
+    <div class="card-row">
+      <span class="card-icon">📞</span>
+      ${p.p ? `<a href="tel:${p.p}">${p.p}</a>` : '<span class="card-na">—</span>'}
+    </div>
+    <div class="card-row">
+      <span class="card-icon">🌐</span>
+      ${p.w ? `<a href="${p.w}" target="_blank" rel="noopener">${p.w.replace(/^https?:\/\//,'').replace(/\/$/,'')}</a>` : '<span class="card-na">—</span>'}
+    </div>
+  </div>`;
+}
+
+// ════════════════════════════
+// VIEW 1 — SEARCH
+// ════════════════════════════
+let searchMode = 'nom'; // 'nom' or 'ville'
+const searchInput = document.getElementById('searchInput');
+const acDrop = document.getElementById('acDrop');
+const clearBtn = document.getElementById('clearBtn');
+const searchResults = document.getElementById('searchResults');
+let acIdx = -1;
+
+function setMode(m) {
+  searchMode = m;
+  document.getElementById('modeNom').classList.toggle('active', m==='nom');
+  document.getElementById('modeVille').classList.toggle('active', m==='ville');
+  searchInput.placeholder = m==='nom' ? 'Nom de la pizzeria…' : 'Nom de la ville ou région…';
+  const q = searchInput.value.trim();
+  if (q) { showAC(q); doSearch(q); }
+}
+
+function norm(s) {
+  return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+
+function matchItem(p, q) {
+  const nq = norm(q);
+  if (searchMode==='nom') return norm(p.n).includes(nq);
+  return norm(p.c).includes(nq) || norm(p.r).includes(nq) || norm(CANTON_NAMES[p.canton]||'').includes(nq);
+}
+
+function hl(text, q) {
+  if (!q) return text;
+  const i = norm(text).indexOf(norm(q));
+  if (i<0) return text;
+  return text.slice(0,i)+'<mark>'+text.slice(i,i+q.length)+'</mark>'+text.slice(i+q.length);
+}
+
+function showAC(q) {
+  acDrop.innerHTML=''; acIdx=-1;
+  if (!q) { acDrop.classList.remove('open'); return; }
+  const matches = P.filter(p=>matchItem(p,q)).slice(0,9);
+  if (!matches.length) { acDrop.classList.remove('open'); return; }
+  matches.slice(0,8).forEach(p=>{
+    const d=document.createElement('div');
+    d.className='ac-item';
+    const mainText = searchMode==='nom'?p.n:p.c;
+    const subText = searchMode==='nom'?p.c:p.r;
+    d.innerHTML=`<span>🍕</span><span class="ac-name">${hl(mainText,q)}</span><span class="ac-city">${subText}</span>`;
+    d.addEventListener('mousedown',e=>{e.preventDefault();searchInput.value=mainText;doSearch(mainText);acDrop.classList.remove('open');});
+    acDrop.appendChild(d);
+  });
+  if (matches.length>8) {
+    const m=document.createElement('div');m.className='ac-more';
+    m.textContent=`+ ${matches.length-8} autres résultats`;
+    acDrop.appendChild(m);
+  }
+  acDrop.classList.add('open');
+}
+
+function doSearch(q) {
+  clearBtn.style.display = q?'block':'none';
+  const filtered = q ? P.filter(p=>matchItem(p,q)) : P;
+  const total = filtered.length;
+  let html = `<div class="res-header"><span class="res-count"><strong>${total}</strong> pizzeria${total>1?'s':''} trouvée${total>1?'s':''}${q?' pour « '+q+' »':''}</span></div>`;
+  if (!filtered.length) {
+    html += `<div class="empty"><big>🍕</big><p>Aucune pizzeria trouvée. Essayez un autre terme.</p></div>`;
+  } else {
+    // Group by region when showing all; flat grid when searching
+    if (!q) {
+      const groups={};
+      filtered.forEach(p=>{ if(!groups[p.r])groups[p.r]=[]; groups[p.r].push(p); });
+      Object.entries(groups).forEach(([rg,items])=>{
+        html+=`<div style="margin-bottom:36px"><div class="city-result-header">${rg}</div><div class="cards">`;
+        items.forEach((p,i)=>html+=buildCard(p,Math.min(i*.04,.4)));
+        html+='</div></div>';
+      });
+    } else {
+      html+=`<div class="cards">`;
+      filtered.forEach((p,i)=>html+=buildCard(p,Math.min(i*.04,.4)));
+      html+=`</div>`;
+    }
+  }
+  searchResults.innerHTML = html;
+}
+
+searchInput.addEventListener('input',()=>{
+  const q=searchInput.value.trim();
+  showAC(q); doSearch(q);
+});
+searchInput.addEventListener('keydown',e=>{
+  const items=acDrop.querySelectorAll('.ac-item');
+  if(e.key==='ArrowDown'){e.preventDefault();acIdx=Math.min(acIdx+1,items.length-1);items.forEach((it,i)=>it.classList.toggle('ac-active',i===acIdx));}
+  else if(e.key==='ArrowUp'){e.preventDefault();acIdx=Math.max(acIdx-1,-1);items.forEach((it,i)=>it.classList.toggle('ac-active',i===acIdx));}
+  else if(e.key==='Enter'){if(acIdx>=0&&items[acIdx])items[acIdx].dispatchEvent(new Event('mousedown'));else{acDrop.classList.remove('open');doSearch(searchInput.value.trim());}}
+  else if(e.key==='Escape')acDrop.classList.remove('open');
+});
+document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap'))acDrop.classList.remove('open');});
+clearBtn.addEventListener('click',()=>{searchInput.value='';clearBtn.style.display='none';acDrop.classList.remove('open');doSearch('');searchInput.focus();});
+
+// Initial render
+doSearch('');
+
+// ════════════════════════════
+// VIEW 2 — MAP
+// ════════════════════════════
+let selectedCanton = null;
+
+function selectCanton(id) {
+  // Deselect previous
+  if (selectedCanton) {
+    document.getElementById('cp-'+selectedCanton)?.classList.remove('selected');
+    document.getElementById('cl-'+selectedCanton)?.classList.remove('selected');
+  }
+  selectedCanton = id;
+  document.getElementById('cp-'+id)?.classList.add('selected');
+  document.getElementById('cl-'+id)?.classList.add('selected');
+
+  const items = P.filter(p=>p.canton===id);
+  const name = CANTON_NAMES[id] || id;
+  let html = `<div class="map-region-title">${name}</div>
+    <div class="map-region-count">${items.length} pizzeria${items.length>1?'s':''}</div>
+    <div class="cards">`;
+  items.forEach((p,i)=>html+=buildCard(p,Math.min(i*.04,.4)));
+  html+='</div>';
+  document.getElementById('mapResults').innerHTML = html;
+}
+
+// ════════════════════════════
+// VIEW 3 — PAR VILLE
+// ════════════════════════════
+let cityBuilt = false;
+let selectedRegion = null;
+
+function buildCityView() {
+  cityBuilt = true;
+  const regions = [...new Set(P.map(p=>p.r))].sort();
+  const filtersEl = document.getElementById('cityFilters');
+  filtersEl.innerHTML = '';
+
+  // "Toutes" button
+  const all = document.createElement('button');
+  all.className='city-btn active';
+  all.innerHTML=`Toutes les régions <span class="city-count">${P.length}</span>`;
+  all.onclick=()=>filterCity(null, all);
+  filtersEl.appendChild(all);
+
+  regions.forEach(r=>{
+    const count = P.filter(p=>p.r===r).length;
+    const btn = document.createElement('button');
+    btn.className='city-btn';
+    btn.innerHTML=`${r} <span class="city-count">${count}</span>`;
+    btn.onclick=()=>filterCity(r, btn);
+    filtersEl.appendChild(btn);
+  });
+  filterCity(null, all);
+}
+
+function filterCity(region, btnEl) {
+  document.querySelectorAll('.city-btn').forEach(b=>b.classList.remove('active'));
+  btnEl.classList.add('active');
+  selectedRegion = region;
+  const items = region ? P.filter(p=>p.r===region) : P;
+  const resEl = document.getElementById('cityResults');
+  if (!region) {
+    // Show all grouped
+    const regions = [...new Set(P.map(p=>p.r))].sort();
+    let html='';
+    regions.forEach(r=>{
+      const ri=P.filter(p=>p.r===r);
+      html+=`<div style="margin-bottom:36px"><div class="city-result-header">${r} <small style="font-family:Lora;font-weight:400;font-size:.85rem;color:var(--brown3);font-style:italic">(${ri.length})</small></div><div class="cards">`;
+      ri.forEach((p,i)=>html+=buildCard(p,Math.min(i*.04,.3)));
+      html+='</div></div>';
+    });
+    resEl.innerHTML=html;
+  } else {
+    let html=`<div class="city-result-header">${region} <small style="font-family:Lora;font-weight:400;font-size:.85rem;color:var(--brown3);font-style:italic">(${items.length})</small></div><div class="cards">`;
+    items.forEach((p,i)=>html+=buildCard(p,Math.min(i*.04,.4)));
+    html+='</div>';
+    resEl.innerHTML=html;
+  }
+}
+</script>
+</body>
+</html>
